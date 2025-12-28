@@ -294,4 +294,3 @@ If you find this project helpful, please consider giving it a star!
 
 **Built with ❤️ for the AI and C++ communities**
 
-# mcpcpp
