@@ -1,0 +1,811 @@
+{
+  "server_info": {
+    "name": "DynamicTaskServer",
+    "version": "1.0.0",
+    "description": "Dynamic MCP server that loads tasks from configuration",
+    "require_auth": false
+  },
+  "tasks": [
+    {
+      "name": "get_user_data",
+      "description": "Fetch user data from database",
+      "operation_type": "database",
+      "config": {
+        "db_type": "postgresql",
+        "query": "SELECT * FROM users WHERE id = {user_id}",
+        "connection_string": "postgresql://localhost:5432/mydb"
+      },
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "integer",
+          "required": true,
+          "description": "User ID to fetch"
+        }
+      ]
+    },
+    {
+      "name": "create_user",
+      "description": "Create a new user in database",
+      "operation_type": "database",
+      "config": {
+        "db_type": "postgresql",
+        "query": "INSERT INTO users (name, email) VALUES ({name}, {email}) RETURNING id",
+        "connection_string": "postgresql://localhost:5432/mydb"
+      },
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "User's name"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "description": "User's email address"
+        }
+      ]
+    },
+    {
+      "name": "fetch_weather",
+      "description": "Fetch weather data from REST API",
+      "operation_type": "rest_api",
+      "config": {
+        "method": "GET",
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "query_params": {
+          "q": "{city}",
+          "appid": "{api_key}"
+        }
+      },
+      "parameters": [
+        {
+          "name": "city",
+          "type": "string",
+          "required": true,
+          "description": "City name for weather lookup"
+        },
+        {
+          "name": "api_key",
+          "type": "string",
+          "required": false,
+          "description": "API key (can be set in config)",
+          "default": "demo_key"
+        }
+      ]
+    },
+    {
+      "name": "send_notification",
+      "description": "Send notification via REST API",
+      "operation_type": "rest_api",
+      "config": {
+        "method": "POST",
+        "url": "https://api.example.com/notify",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {token}"
+        },
+        "body": {
+          "message": "{message}",
+          "recipient": "{recipient}"
+        }
+      },
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Notification message"
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "required": true,
+          "description": "Recipient email or ID"
+        },
+        {
+          "name": "token",
+          "type": "string",
+          "required": false,
+          "description": "Auth token",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "name": "list_files",
+      "description": "List files in a directory",
+      "operation_type": "terminal",
+      "config": {
+        "command": "ls -la {directory}",
+        "shell": true,
+        "timeout": 30
+      },
+      "parameters": [
+        {
+          "name": "directory",
+          "type": "string",
+          "required": true,
+          "description": "Directory path to list",
+          "default": "."
+        }
+      ]
+    },
+    {
+      "name": "check_disk_usage",
+      "description": "Check disk usage of the system",
+      "operation_type": "terminal",
+      "config": {
+        "command": "df -h",
+        "shell": true,
+        "timeout": 10
+      },
+      "parameters": []
+    },
+    {
+      "name": "run_python_script",
+      "description": "Execute a Python script",
+      "operation_type": "terminal",
+      "config": {
+        "command": "python3 {script_path}",
+        "shell": true,
+        "timeout": 60
+      },
+      "parameters": [
+        {
+          "name": "script_path",
+          "type": "string",
+          "required": true,
+          "description": "Path to Python script"
+        }
+      ]
+    },
+    {
+      "name": "search_logs",
+      "description": "Search for pattern in log files",
+      "operation_type": "terminal",
+      "config": {
+        "command": "grep -r '{pattern}' {log_dir}",
+        "shell": true,
+        "timeout": 30
+      },
+      "parameters": [
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": true,
+          "description": "Search pattern"
+        },
+        {
+          "name": "log_dir",
+          "type": "string",
+          "required": false,
+          "description": "Log directory path",
+          "default": "/var/log"
+        }
+      ]
+    },
+    {
+      "name": "backup_database",
+      "description": "Create database backup",
+      "operation_type": "terminal",
+      "config": {
+        "command": "pg_dump -U {username} -d {database} > {output_file}",
+        "shell": true,
+        "timeout": 300
+      },
+      "parameters": [
+        {
+          "name": "database",
+          "type": "string",
+          "required": true,
+          "description": "Database name"
+        },
+        {
+          "name": "username",
+          "type": "string",
+          "required": false,
+          "description": "Database username",
+          "default": "postgres"
+        },
+        {
+          "name": "output_file",
+          "type": "string",
+          "required": true,
+          "description": "Output backup file path"
+        }
+      ]
+    },
+    {
+      "name": "read_file_content",
+      "description": "Read and return file content",
+      "operation_type": "file_operation",
+      "config": {
+        "action": "read",
+        "encoding": "utf-8"
+      },
+      "parameters": [
+        {
+          "name": "file_path",
+          "type": "string",
+          "required": true,
+          "description": "Path to file to read"
+        }
+      ]
+    },
+    {
+      "name": "write_file_content",
+      "description": "Write content to a file",
+      "operation_type": "file_operation",
+      "config": {
+        "action": "write",
+        "encoding": "utf-8",
+        "create_dirs": true
+      },
+      "parameters": [
+        {
+          "name": "file_path",
+          "type": "string",
+          "required": true,
+          "description": "Path to file to write"
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "Content to write"
+        }
+      ]
+    },
+    {
+      "name": "parse_json_data",
+      "description": "Parse and validate JSON data",
+      "operation_type": "data_processing",
+      "config": {
+        "processor": "json_parser",
+        "validate_schema": false
+      },
+      "parameters": [
+        {
+          "name": "json_string",
+          "type": "string",
+          "required": true,
+          "description": "JSON string to parse"
+        }
+      ]
+    },
+    {
+      "name": "transform_csv",
+      "description": "Transform CSV data",
+      "operation_type": "data_processing",
+      "config": {
+        "processor": "csv_transformer",
+        "delimiter": ","
+      },
+      "parameters": [
+        {
+          "name": "csv_data",
+          "type": "string",
+          "required": true,
+          "description": "CSV data to transform"
+        },
+        {
+          "name": "operation",
+          "type": "string",
+          "required": true,
+          "description": "Operation: filter, sort, aggregate"
+        }
+      ]
+    },
+    {
+      "name": "get_sample_users",
+      "description": "Get a list of sample user data (returns JSON response)",
+      "operation_type": "rest_api",
+      "config": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/users",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      "parameters": []
+    },
+    {
+      "name": "get_sample_posts",
+      "description": "Get sample blog posts by user ID (returns JSON response)",
+      "operation_type": "rest_api",
+      "config": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "query_params": {
+          "userId": "{user_id}"
+        }
+      },
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "integer",
+          "required": false,
+          "description": "User ID to filter posts (1-10)",
+          "default": 1
+        }
+      ]
+    },
+    {
+      "name": "create_sample_post",
+      "description": "Create a new sample post (returns JSON response with created post)",
+      "operation_type": "rest_api",
+      "config": {
+        "method": "POST",
+        "url": "https://jsonplaceholder.typicode.com/posts",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "{title}",
+          "body": "{body}",
+          "userId": "{user_id}"
+        }
+      },
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Post title"
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "Post content/body"
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "required": false,
+          "description": "User ID",
+          "default": 1
+        }
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "name": "user_registration_workflow",
+      "description": "Complete user registration process",
+      "steps": [
+        {
+          "task": "create_user",
+          "name": "step_create_user",
+          "output_mapping": {
+            "user_id": "created_user_id"
+          }
+        },
+        {
+          "task": "send_notification",
+          "name": "step_notify_user",
+          "dependencies": ["step_create_user"],
+          "input_mapping": {
+            "recipient": "{created_user_id}",
+            "message": "Welcome! Your account has been created."
+          }
+        }
+      ],
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "User name"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "description": "User email"
+        }
+      ]
+    },
+    {
+      "name": "data_backup_workflow",
+      "description": "Backup database and notify admin",
+      "steps": [
+        {
+          "task": "backup_database",
+          "name": "step_backup",
+          "output_mapping": {
+            "backup_file": "backup_path"
+          }
+        },
+        {
+          "task": "check_disk_usage",
+          "name": "step_check_disk",
+          "dependencies": ["step_backup"]
+        },
+        {
+          "task": "send_notification",
+          "name": "step_notify_admin",
+          "dependencies": ["step_backup", "step_check_disk"],
+          "input_mapping": {
+            "recipient": "admin@example.com",
+            "message": "Backup completed: {backup_path}"
+          }
+        }
+      ],
+      "parameters": [
+        {
+          "name": "database",
+          "type": "string",
+          "required": true,
+          "description": "Database to backup"
+        },
+        {
+          "name": "output_file",
+          "type": "string",
+          "required": true,
+          "description": "Backup file path"
+        }
+      ]
+    },
+    {
+      "name": "log_analysis_workflow",
+      "description": "Search logs, process results, and notify",
+      "steps": [
+        {
+          "task": "search_logs",
+          "name": "step_search",
+          "output_mapping": {
+            "results": "log_results"
+          }
+        },
+        {
+          "task": "write_file_content",
+          "name": "step_save_results",
+          "dependencies": ["step_search"],
+          "input_mapping": {
+            "file_path": "/tmp/log_analysis.txt",
+            "content": "{log_results}"
+          }
+        },
+        {
+          "task": "send_notification",
+          "name": "step_notify",
+          "dependencies": ["step_save_results"],
+          "input_mapping": {
+            "recipient": "devops@example.com",
+            "message": "Log analysis complete. Results saved."
+          }
+        }
+      ],
+      "parameters": [
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": true,
+          "description": "Pattern to search in logs"
+        },
+        {
+          "name": "log_dir",
+          "type": "string",
+          "required": false,
+          "description": "Log directory",
+          "default": "/var/log"
+        }
+      ]
+    },
+    {
+      "name": "data_sync_workflow",
+      "description": "Sync data: Fetch from API → Save to DB → Backup to file → Notify",
+      "steps": [
+        {
+          "task": "fetch_weather",
+          "name": "step_fetch_api",
+          "output_mapping": {
+            "data": "weather_data"
+          }
+        },
+        {
+          "task": "create_user",
+          "name": "step_save_db",
+          "dependencies": ["step_fetch_api"],
+          "input_mapping": {
+            "name": "weather_sync",
+            "email": "system@example.com"
+          }
+        },
+        {
+          "task": "write_file_content",
+          "name": "step_backup_file",
+          "dependencies": ["step_save_db"],
+          "input_mapping": {
+            "file_path": "/tmp/weather_backup.json",
+            "content": "{weather_data}"
+          }
+        },
+        {
+          "task": "send_notification",
+          "name": "step_notify",
+          "dependencies": ["step_backup_file"],
+          "input_mapping": {
+            "recipient": "admin@example.com",
+            "message": "Data sync completed successfully"
+          }
+        }
+      ],
+      "parameters": [
+        {
+          "name": "city",
+          "type": "string",
+          "required": true,
+          "description": "City for weather data"
+        },
+        {
+          "name": "api_key",
+          "type": "string",
+          "required": false,
+          "description": "API key",
+          "default": "demo_key"
+        }
+      ]
+    },
+    {
+      "name": "system_health_check_workflow",
+      "description": "Terminal checks → Save to file → Parse data → Send report",
+      "steps": [
+        {
+          "task": "check_disk_usage",
+          "name": "step_disk_check",
+          "output_mapping": {
+            "stdout": "disk_info"
+          }
+        },
+        {
+          "task": "list_files",
+          "name": "step_list_logs",
+          "dependencies": ["step_disk_check"],
+          "input_mapping": {
+            "directory": "/var/log"
+          }
+        },
+        {
+          "task": "write_file_content",
+          "name": "step_save_report",
+          "dependencies": ["step_disk_check", "step_list_logs"],
+          "input_mapping": {
+            "file_path": "/tmp/system_health.txt",
+            "content": "Disk Info: {disk_info}"
+          }
+        },
+        {
+          "task": "read_file_content",
+          "name": "step_read_report",
+          "dependencies": ["step_save_report"],
+          "input_mapping": {
+            "file_path": "/tmp/system_health.txt"
+          }
+        },
+        {
+          "task": "send_notification",
+          "name": "step_notify",
+          "dependencies": ["step_read_report"],
+          "input_mapping": {
+            "recipient": "ops@example.com",
+            "message": "System health check completed"
+          }
+        }
+      ],
+      "parameters": []
+    },
+    {
+      "name": "deployment_workflow",
+      "description": "Full deployment: Run script → Check logs → Update DB → Notify → Backup",
+      "steps": [
+        {
+          "task": "run_python_script",
+          "name": "step_deploy_script",
+          "output_mapping": {
+            "stdout": "deploy_output"
+          }
+        },
+        {
+          "task": "search_logs",
+          "name": "step_check_errors",
+          "dependencies": ["step_deploy_script"],
+          "input_mapping": {
+            "pattern": "ERROR",
+            "log_dir": "/var/log/app"
+          }
+        },
+        {
+          "task": "create_user",
+          "name": "step_log_deployment",
+          "dependencies": ["step_check_errors"],
+          "input_mapping": {
+            "name": "deployment_log",
+            "email": "deploy@example.com"
+          }
+        },
+        {
+          "task": "send_notification",
+          "name": "step_notify_team",
+          "dependencies": ["step_log_deployment"],
+          "input_mapping": {
+            "recipient": "team@example.com",
+            "message": "Deployment completed: {deploy_output}"
+          }
+        },
+        {
+          "task": "backup_database",
+          "name": "step_backup",
+          "dependencies": ["step_notify_team"],
+          "input_mapping": {
+            "database": "production",
+            "username": "postgres",
+            "output_file": "/backup/post_deploy.sql"
+          }
+        }
+      ],
+      "parameters": [
+        {
+          "name": "script_path",
+          "type": "string",
+          "required": true,
+          "description": "Path to deployment script"
+        }
+      ]
+    },
+    {
+      "name": "data_pipeline_workflow",
+      "description": "ETL Pipeline: Extract (API) → Transform (File) → Load (DB) → Validate",
+      "steps": [
+        {
+          "task": "fetch_weather",
+          "name": "step_extract",
+          "output_mapping": {
+            "data": "raw_data"
+          }
+        },
+        {
+          "task": "write_file_content",
+          "name": "step_stage_data",
+          "dependencies": ["step_extract"],
+          "input_mapping": {
+            "file_path": "/tmp/staging_data.json",
+            "content": "{raw_data}"
+          }
+        },
+        {
+          "task": "parse_json_data",
+          "name": "step_transform",
+          "dependencies": ["step_stage_data"],
+          "input_mapping": {
+            "json_string": "{raw_data}"
+          }
+        },
+        {
+          "task": "create_user",
+          "name": "step_load_db",
+          "dependencies": ["step_transform"],
+          "input_mapping": {
+            "name": "data_pipeline",
+            "email": "etl@example.com"
+          }
+        },
+        {
+          "task": "get_user_data",
+          "name": "step_validate",
+          "dependencies": ["step_load_db"],
+          "input_mapping": {
+            "user_id": 1
+          }
+        },
+        {
+          "task": "send_notification",
+          "name": "step_report",
+          "dependencies": ["step_validate"],
+          "input_mapping": {
+            "recipient": "data-team@example.com",
+            "message": "ETL pipeline completed successfully"
+          }
+        }
+      ],
+      "parameters": [
+        {
+          "name": "city",
+          "type": "string",
+          "required": true,
+          "description": "City for data extraction"
+        },
+        {
+          "name": "api_key",
+          "type": "string",
+          "required": false,
+          "description": "API key",
+          "default": "demo_key"
+        }
+      ]
+    },
+    {
+      "name": "incident_response_workflow",
+      "description": "Incident handling: Search logs → Parse → Save report → Notify → Backup DB",
+      "steps": [
+        {
+          "task": "search_logs",
+          "name": "step_find_errors",
+          "output_mapping": {
+            "stdout": "error_logs"
+          }
+        },
+        {
+          "task": "write_file_content",
+          "name": "step_save_errors",
+          "dependencies": ["step_find_errors"],
+          "input_mapping": {
+            "file_path": "/tmp/incident_report.txt",
+            "content": "{error_logs}"
+          }
+        },
+        {
+          "task": "parse_json_data",
+          "name": "step_analyze",
+          "dependencies": ["step_save_errors"],
+          "input_mapping": {
+            "json_string": "{\"incident\": \"analyzed\"}"
+          }
+        },
+        {
+          "task": "create_user",
+          "name": "step_log_incident",
+          "dependencies": ["step_analyze"],
+          "input_mapping": {
+            "name": "incident_tracker",
+            "email": "incident@example.com"
+          }
+        },
+        {
+          "task": "send_notification",
+          "name": "step_alert_team",
+          "dependencies": ["step_log_incident"],
+          "input_mapping": {
+            "recipient": "oncall@example.com",
+            "message": "Incident detected and logged"
+          }
+        },
+        {
+          "task": "backup_database",
+          "name": "step_emergency_backup",
+          "dependencies": ["step_alert_team"],
+          "input_mapping": {
+            "database": "production",
+            "username": "postgres",
+            "output_file": "/backup/incident_backup.sql"
+          }
+        }
+      ],
+      "parameters": [
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": true,
+          "description": "Error pattern to search"
+        },
+        {
+          "name": "log_dir",
+          "type": "string",
+          "required": false,
+          "description": "Log directory",
+          "default": "/var/log"
+        }
+      ]
+    }
+  ]
+}
